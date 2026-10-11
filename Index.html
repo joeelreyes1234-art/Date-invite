@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Will You Go On A Date With Me? 💖</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Canvas Confetti Library for Grand Finale -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rosepink: '#ff4d6d',
+            softblush: '#fff0f3',
+            deepromantic: '#590d22',
+            accentpink: '#ff758f',
+            warmwhite: '#fffafb'
+          },
+          fontFamily: {
+            cursive: ['Dancing Script', 'cursive'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      touch-action: manipulation;
+      background: linear-gradient(135deg, #ffccd5 0%, #fff0f3 50%, #ffb3c1 100%);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Floating Heart Particles Background */
+    .heart-bg {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatUp linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(0.5) rotate(0deg);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1.2) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Wiggle Animation for YES button when dodging */
+    @keyframes wiggle {
+      0%, 100% { transform: scale(var(--yes-scale, 1)) rotate(0deg); }
+      25% { transform: scale(var(--yes-scale, 1)) rotate(-5deg); }
+      75% { transform: scale(var(--yes-scale, 1)) rotate(5deg); }
+    }
+
+    .animate-wiggle {
+      animation: wiggle 0.4s ease-in-out infinite;
+    }
+
+    /* Card Glow and Transitions */
+    .option-card {
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .option-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .option-card.selected {
+      border-color: #ff4d6d;
+      background-color: #ffe6e8;
+      transform: scale(1.04);
+      box-shadow: 0 10px 25px -5px rgba(255, 77, 109, 0.4);
+    }
+
+    .shimmer-btn {
+      background: linear-gradient(90deg, #ff4d6d 0%, #ff758f 50%, #ff4d6d 100%);
+      background-size: 200% auto;
+      transition: 0.3s;
+    }
+    .shimmer-btn:hover {
+      background-position: right center;
+    }
+  </style>
+</head>
+<body class="text-gray-800 flex flex-col justify-between relative select-none">
+
+  <!-- Background Animated Hearts Container -->
+  <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+  <!-- Header Header / Title Bar -->
+  <header class="w-full p-4 flex justify-between items-center z-10 max-w-md mx-auto">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl text-rosepink"><i class="fa-solid fa-heart animate-pulse"></i></span>
+      <span class="font-cursive text-2xl font-bold text-deepromantic">Special Invitation</span>
+    </div>
+    <div class="text-xs font-semibold px-3 py-1 bg-white/80 backdrop-blur-md rounded-full text-rosepink border border-rosepink/20 shadow-sm">
+      Just for You ✨
+    </div>
+  </header>
+
+  <main class="w-full max-w-md mx-auto px-4 py-2 flex-grow flex flex-col justify-center items-center z-10 relative">
+
+    <!-- ================= STEP 1: THE BIG QUESTION ================= -->
+    <div id="step-1" class="w-full bg-white/85 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/60 text-center flex flex-col items-center transition-all duration-500">
+      <div class="w-28 h-28 mb-3 relative flex items-center justify-center">
+        <div class="absolute inset-0 bg-rosepink/10 rounded-full animate-ping"></div>
+        <img id="main-gif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1aWRwb3VlMjdtOHBmM3lyMHdhZHJia2tza2I1YWszcnBoc3IyeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWR3JmN0PWc/c76IJLufpNwSULPk77/giphy.gif" alt="Cute Bear Asking" class="w-24 h-24 object-contain z-10 rounded-2xl shadow-sm">
+      </div>
+
+      <h1 class="font-cursive text-3xl sm:text-4xl font-bold text-deepromantic mb-2">Will you go on a date with me? 💖</h1>
+      <p class="text-gray-600 text-xs sm:text-sm mb-6">I promise great food, lots of laughs, and unforgettable memories! 🌹</p>
+
+      <!-- Buttons Box -->
+      <div class="relative w-full min-h-[120px] flex items-center justify-center gap-4">
+        <!-- YES BUTTON -->
+        <button id="yesBtn" onclick="goToStep(2)" class="shimmer-btn text-white font-bold text-lg px-8 py-3.5 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-200 z-20 flex items-center gap-2">
+          YES! ❤️
+        </button>
+
+        <!-- NO BUTTON (Runaway button) -->
+        <button id="noBtn" class="bg-gray-200 text-gray-700 font-semibold text-sm px-6 py-3 rounded-full hover:bg-gray-300 transition-all duration-150 z-20 absolute shadow-md">
+          No
+        </button>
+      </div>
+      <p id="no-hint" class="text-xs text-rosepink font-medium mt-2 h-4 italic"></p>
+    </div>
+
+    <!-- ================= STEP 2: FOOD SELECTION ================= -->
+    <div id="step-2" class="hidden w-full bg-white/85 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/60 text-center transition-all duration-500">
+      <div class="text-3xl mb-1">🍕 🍣 🍝</div>
+      <h2 class="font-cursive text-3xl font-bold text-deepromantic mb-1">What are we eating?</h2>
+      <p class="text-gray-500 text-xs mb-4">Pick what you'd love to feast on!</p>
+
+      <div class="grid grid-cols-2 gap-3 mb-6" id="food-options">
+        <div onclick="selectOption('food', 'Pizza 🍕', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🍕</span>
+          <span class="font-bold text-sm text-gray-800">Pizza</span>
+          <span class="text-[10px] text-gray-500">Cheesy Perfection</span>
+        </div>
+
+        <div onclick="selectOption('food', 'Sushi 🍣', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🍣</span>
+          <span class="font-bold text-sm text-gray-800">Sushi</span>
+          <span class="text-[10px] text-gray-500">Fresh & Light</span>
+        </div>
+
+        <div onclick="selectOption('food', 'Burgers 🍔', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🍔</span>
+          <span class="font-bold text-sm text-gray-800">Burgers</span>
+          <span class="text-[10px] text-gray-500">Juicy & Casual</span>
+        </div>
+
+        <div onclick="selectOption('food', 'Italian 🍝', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🍝</span>
+          <span class="font-bold text-sm text-gray-800">Italian</span>
+          <span class="text-[10px] text-gray-500">Cozy Pasta Date</span>
+        </div>
+
+        <div onclick="selectOption('food', 'Desserts 🍰', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm col-span-2">
+          <span class="text-3xl mb-1">🍰</span>
+          <span class="font-bold text-sm text-gray-800">Desserts & Cafe</span>
+          <span class="text-[10px] text-gray-500">Sweet Treat & Coffee</span>
+        </div>
+      </div>
+
+      <button id="btn-step-2" disabled onclick="goToStep(3)" class="w-full bg-gray-300 text-white font-bold py-3 rounded-2xl transition-all duration-300 shadow-md">
+        Continue to Activity ➔
+      </button>
+    </div>
+
+    <!-- ================= STEP 3: ACTIVITY SELECTION ================= -->
+    <div id="step-3" class="hidden w-full bg-white/85 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/60 text-center transition-all duration-500">
+      <div class="text-3xl mb-1">🎳 🍿 🚗</div>
+      <h2 class="font-cursive text-3xl font-bold text-deepromantic mb-1">What are we doing?</h2>
+      <p class="text-gray-500 text-xs mb-4">Choose our ideal date activity!</p>
+
+      <div class="grid grid-cols-2 gap-3 mb-6" id="activity-options">
+        <div onclick="selectOption('activity', 'Bowling 🎳', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🎳</span>
+          <span class="font-bold text-sm text-gray-800">Bowling</span>
+          <span class="text-[10px] text-gray-500">Playful Competition</span>
+        </div>
+
+        <div onclick="selectOption('activity', 'Movie Night 🍿', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🍿</span>
+          <span class="font-bold text-sm text-gray-800">Movie Night</span>
+          <span class="text-[10px] text-gray-500">Cinema & Popcorn</span>
+        </div>
+
+        <div onclick="selectOption('activity', 'Stroll in the Park 🌳', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🌳</span>
+          <span class="font-bold text-sm text-gray-800">Park Stroll</span>
+          <span class="text-[10px] text-gray-500">Peaceful & Romantic</span>
+        </div>
+
+        <div onclick="selectOption('activity', 'Late Night Drive 🚗', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm">
+          <span class="text-3xl mb-1">🚗</span>
+          <span class="font-bold text-sm text-gray-800">Late Drive</span>
+          <span class="text-[10px] text-gray-500">Good Music & City Lights</span>
+        </div>
+
+        <div onclick="selectOption('activity', 'Sunset View 🌅', this)" class="option-card cursor-pointer p-3 bg-white/90 border-2 border-rosepink/20 rounded-2xl flex flex-col items-center shadow-sm col-span-2">
+          <span class="text-3xl mb-1">🌅</span>
+          <span class="font-bold text-sm text-gray-800">Sunset View</span>
+          <span class="text-[10px] text-gray-500">Golden Hour Vibe</span>
+        </div>
+      </div>
+
+      <button id="btn-step-3" disabled onclick="goToStep(4)" class="w-full bg-gray-300 text-white font-bold py-3 rounded-2xl transition-all duration-300 shadow-md">
+        Continue to Date & Time ➔
+      </button>
+    </div>
+
+    <!-- ================= STEP 4: DATE & TIME ================= -->
+    <div id="step-4" class="hidden w-full bg-white/85 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/60 text-center transition-all duration-500">
+      <div class="text-3xl mb-1">📅 ⏰</div>
+      <h2 class="font-cursive text-3xl font-bold text-deepromantic mb-1">When are we going?</h2>
+      <p class="text-gray-500 text-xs mb-4">Select the day and time that fits your schedule!</p>
+
+      <div class="space-y-4 mb-6 text-left">
+        <div>
+          <label class="block text-xs font-bold text-deepromantic mb-1 ml-1"><i class="fa-solid fa-calendar-days text-rosepink mr-1"></i> Pick a Date</label>
+          <input type="date" id="dateInput" onchange="checkDateTime()" class="w-full bg-white border-2 border-rosepink/30 rounded-2xl p-3 text-sm font-semibold text-gray-700 outline-none focus:border-rosepink transition-all">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-deepromantic mb-1 ml-1"><i class="fa-solid fa-clock text-rosepink mr-1"></i> Pick a Time</label>
+          <select id="timeInput" onchange="checkDateTime()" class="w-full bg-white border-2 border-rosepink/30 rounded-2xl p-3 text-sm font-semibold text-gray-700 outline-none focus:border-rosepink transition-all">
+            <option value="">Choose time slot...</option>
+            <option value="5:00 PM (Sunset Hour)">5:00 PM - Sunset Hour 🌅</option>
+            <option value="7:00 PM (Dinner Time)">7:00 PM - Dinner Time 🍷</option>
+            <option value="8:30 PM (Late Night)">8:30 PM - Late Night 🌌</option>
+            <option value="Surprise me!">Surprise me with the time! ✨</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="btn-step-4" disabled onclick="finishPlanning()" class="w-full bg-gray-300 text-white font-bold py-3 rounded-2xl transition-all duration-300 shadow-md">
+        Create Our Ticket 🎟️
+      </button>
+    </div>
+
+    <!-- ================= STEP 5: GRAND FINALE TICKET ================= -->
+    <div id="step-5" class="hidden w-full bg-white/90 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border-2 border-rosepink/40 text-center transition-all duration-500 relative overflow-hidden">
+      
+      <div class="bg-rosepink text-white py-1.5 px-4 rounded-full text-xs font-bold uppercase tracking-wider inline-block mb-3 shadow-sm">
+        🎟️ Official Date Pass
+      </div>
+
+      <h2 class="font-cursive text-4xl font-bold text-deepromantic mb-1">It's a Date! ❤️</h2>
+      <p class="text-gray-600 text-xs mb-4">Here is our official plan. Can't wait!</p>
+
+      <!-- Ticket Summary Card -->
+      <div class="bg-softblush/80 rounded-2xl p-4 text-left border border-rosepink/20 space-y-2.5 mb-6 text-sm">
+        <div class="flex items-center justify-between border-b border-rosepink/10 pb-2">
+          <span class="text-gray-500 text-xs flex items-center gap-1.5"><i class="fa-solid fa-utensils text-rosepink"></i> Food:</span>
+          <span id="summary-food" class="font-bold text-deepromantic text-xs"></span>
+        </div>
+
+        <div class="flex items-center justify-between border-b border-rosepink/10 pb-2">
+          <span class="text-gray-500 text-xs flex items-center gap-1.5"><i class="fa-solid fa-compass text-rosepink"></i> Activity:</span>
+          <span id="summary-activity" class="font-bold text-deepromantic text-xs"></span>
+        </div>
+
+        <div class="flex items-center justify-between border-b border-rosepink/10 pb-2">
+          <span class="text-gray-500 text-xs flex items-center gap-1.5"><i class="fa-solid fa-calendar text-rosepink"></i> Date:</span>
+          <span id="summary-date" class="font-bold text-deepromantic text-xs"></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <span class="text-gray-500 text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock text-rosepink"></i> Time:</span>
+          <span id="summary-time" class="font-bold text-deepromantic text-xs"></span>
+        </div>
+      </div>
+
+      <!-- Action Button to Send Choices -->
+      <div class="space-y-3">
+        <a id="whatsappLink" target="_blank" href="#" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-95 text-sm">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Send Invitation to Him 💌
+        </a>
+
+        <button onclick="restartApp()" class="text-xs text-rosepink font-semibold hover:underline flex items-center justify-center gap-1 mx-auto pt-1">
+          <i class="fa-solid fa-rotate-left"></i> Change Choices
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="w-full text-center py-3 text-xs text-rosepink/80 font-medium z-10">
+    Made with ❤️ for someone extra special
+  </footer>
+
+  <script>
+    // Selections Store
+    const selections = {
+      food: '',
+      activity: '',
+      date: '',
+      time: ''
+    };
+
+    let noCount = 0;
+    let yesScale = 1;
+    let noScale = 1;
+
+    const noHints = [
+      "Are you sure? 🥺",
+      "Try again! 😜",
+      "Oops, missed it! ✨",
+      "Nice try! You can't say no! 💕",
+      "Just press YES! ❤️"
+    ];
+
+    // Background floating heart particles
+    function initFloatingHearts() {
+      const container = document.getElementById('hearts-container');
+      const icons = ['❤️', '💖', '🌸', '✨', '💕', '🌹'];
+      
+      for (let i = 0; i < 20; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart-bg';
+        heart.innerText = icons[Math.floor(Math.random() * icons.length)];
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDuration = `${4 + Math.random() * 6}s`;
+        heart.style.animationDelay = `${Math.random() * 4}s`;
+        heart.style.fontSize = `${12 + Math.random() * 18}px`;
+        container.appendChild(heart);
+      }
+    }
+
+    // Dodging NO button logic
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const noHint = document.getElementById('no-hint');
+
+    function dodgeNoButton() {
+      noCount++;
+
+      // Random viewport placement with safe bounds
+      const padding = 30;
+      const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+      const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+      const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+      const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+      noBtn.style.position = 'fixed';
+      noBtn.style.left = `${randomX}px`;
+      noBtn.style.top = `${randomY}px`;
+      noBtn.style.zIndex = '50';
+
+      // Shrink No button while growing and wiggling YES button
+      noScale = Math.max(0.4, noScale - 0.1);
+      yesScale = Math.min(2.0, yesScale + 0.15);
+
+      noBtn.style.transform = `scale(${noScale})`;
+      yesBtn.style.setProperty('--yes-scale', yesScale);
+      yesBtn.classList.add('animate-wiggle');
+
+      // Update text hint
+      const hintIdx = (noCount - 1) % noHints.length;
+      noHint.innerText = noHints[hintIdx];
+
+      // Playful reaction GIF update
+      if (noCount === 3) {
+        document.getElementById('main-gif').src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHc3OGJzeXV3aG11bTZ0ZndjZmZ2ZXlhMmhhbzNscHJpNWtnc2p6YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWR3JmN0PWc/K1tgb1IUeBO0g/giphy.gif";
+      }
+    }
+
+    // Attach mouse/touch dodging events
+    noBtn.addEventListener('mouseenter', dodgeNoButton);
+    noBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      dodgeNoButton();
+    });
+    noBtn.addEventListener('click', dodgeNoButton);
+
+    // Navigation controller
+    function goToStep(step) {
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (el) el.classList.add('hidden');
+      }
+
+      const current = document.getElementById(`step-${step}`);
+      if (current) current.classList.remove('hidden');
+
+      if (step === 2 && typeof confetti === 'function') {
+        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+      }
+    }
+
+    // Selection helper for cards
+    function selectOption(category, val, element) {
+      selections[category] = val;
+
+      const cards = element.parentElement.querySelectorAll('.option-card');
+      cards.forEach(c => c.classList.remove('selected'));
+      element.classList.add('selected');
+
+      if (category === 'food') {
+        const btn = document.getElementById('btn-step-2');
+        btn.disabled = false;
+        btn.className = "w-full shimmer-btn text-white font-bold py-3 rounded-2xl shadow-lg transition-all duration-300";
+      } else if (category === 'activity') {
+        const btn = document.getElementById('btn-step-3');
+        btn.disabled = false;
+        btn.className = "w-full shimmer-btn text-white font-bold py-3 rounded-2xl shadow-lg transition-all duration-300";
+      }
+    }
+
+    // Date & Time Validator
+    function checkDateTime() {
+      const dateVal = document.getElementById('dateInput').value;
+      const timeVal = document.getElementById('timeInput').value;
+
+      if (dateVal && timeVal) {
+        selections.date = dateVal;
+        selections.time = timeVal;
+
+        const btn = document.getElementById('btn-step-4');
+        btn.disabled = false;
+        btn.className = "w-full shimmer-btn text-white font-bold py-3 rounded-2xl shadow-lg transition-all duration-300";
+      }
+    }
+
+    // Finalize Ticket & Generate WhatsApp pre-filled text
+    function finishPlanning() {
+      document.getElementById('summary-food').innerText = selections.food;
+      document.getElementById('summary-activity').innerText = selections.activity;
+      document.getElementById('summary-date').innerText = selections.date;
+      document.getElementById('summary-time').innerText = selections.time;
+
+      const message = `YES! I'd love to go on a date with you! ❤️\n\n` +
+        ` Here are my choices:\n` +
+        `• Food: ${selections.food}\n` +
+        `• Activity: ${selections.activity}\n` +
+        `• Date: ${selections.date}\n` +
+        `• Time: ${selections.time}\n\n` +
+        `Can't wait! ✨`;
+
+      document.getElementById('whatsappLink').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+
+      goToStep(5);
+
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+      }
+    }
+
+    // Reset workflow
+    function restartApp() {
+      noCount = 0;
+      yesScale = 1;
+      noScale = 1;
+      noBtn.style.position = 'absolute';
+      noBtn.style.left = '';
+      noBtn.style.top = '';
+      noBtn.style.transform = 'scale(1)';
+      yesBtn.style.setProperty('--yes-scale', 1);
+      yesBtn.classList.remove('animate-wiggle');
+      noHint.innerText = '';
+      document.getElementById('main-gif').src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1aWRwb3VlMjdtOHBmM3lyMHdhZHJia2tza2I1YWszcnBoc3IyeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWR3JmN0PWc/c76IJLufpNwSULPk77/giphy.gif";
+      goToStep(1);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initFloatingHearts();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dateInput').setAttribute('min', today);
+    });
+  </script>
+</body>
+</html>
